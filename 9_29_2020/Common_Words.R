@@ -4,6 +4,7 @@ library(tidytext)
 library(tidyverse)
 library(ggrepel)
 library(here)
+library(ggtext)
 
 #Make sure roboto condensed is downloaded onto your machine
 font <- "Roboto Condensed"
@@ -50,7 +51,7 @@ data %>%
              arrow = arrow(length = unit(0.025, "npc"),
                            type = "closed")) +
   #Annotate Taylor Words
-  geom_richtext(y=1.65,x=.3,
+  geom_richtext(y=1.6,x=.3,
                 label="*Words like \"never\" and \"back\" are <br/>said more often by Taylor Swift*",
                 label.color = 'red',
                 size=4) +
@@ -63,23 +64,23 @@ data %>%
              arrow = arrow(length = unit(0.025, "npc"),
                            type = "closed")) +
   #Annotate Beyonce Words
-  geom_richtext(y=.4,x=1.25,
+  geom_richtext(y=.4,x=1.3,
                 label="*Words like \"ain't\" and \"girl\" are <br/>said more often by Beyoncé*",
                 label.color = "blue",
                 size=4) +
   scale_y_continuous(labels = function(x) paste0(x, "%")) +
   scale_x_continuous(labels = function(x) paste0(x, "%")) + # Add percent sign 
-  labs(title="Which lyrics are said more often by Beyoncé versus Taylor Swift?",
+  labs(title="Which lyrics are sung more often by Beyoncé vs Taylor Swift?",
        subtitle = "The axes represent the percent of total lyrics a given word, like \"love,\" makes up",
        caption = "Plot: @jakepscott2020 | Data: Rosie Baillie & Dr. Sara Stoudt") +
   theme_minimal(base_family = font, base_size = 12) +
-  theme(plot.title =element_text(size=rel(1.7),face="bold"),
+  theme(plot.title =element_text(size=rel(1.6),face="bold"),
         plot.subtitle = element_markdown(size = rel(1.25),face="italic"),
         plot.caption = element_text(face = "italic", size = rel(0.8), 
                                     color = "grey70"),
         plot.title.position = "plot",
-        axis.text.y = element_blank(),
         legend.position = "none"
   )
 
-ggsave(here("9_29_2020/Relative_Words.png"),dpi=600)
+ggsave(here("9_29_2020/Relative_Words.png"),dpi=600, width = 8, height = 6)
+
