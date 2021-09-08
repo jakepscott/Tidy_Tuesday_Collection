@@ -4,24 +4,27 @@ library(ggtext)
 library(lubridate)
 library(here)
 library(tidytuesdayR)
-library(glue)
+library(patchwork)
 
 font <- "Roboto Condensed"
 windowsFonts(`font`=windowsFont(font))
 windowsFonts()
 
-tuesdata <- tidytuesdayR::tt_load('2021-09-07')
+driver_standings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-09-07/driver_standings.csv')
+drivers <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-09-07/drivers.csv')
+lap_times <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-09-07/lap_times.csv')
+races <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-09-07/races.csv')
 
 
 # Collecting Data ---------------------------------------------------------
-tuesdata$driver_standings %>% arrange(desc(wins))
-tuesdata$races %>% arrange(raceId) %>% View()
-tuesdata$drivers 
-tuesdata$lap_times
+# driver_standings %>% arrange(desc(wins))
+# races %>% arrange(raceId) %>% View()
+# drivers 
+# lap_times
 
-data <- tuesdata$lap_times %>% 
-  left_join(tuesdata$races, by = "raceId") %>% 
-  left_join(tuesdata$drivers, by = "driverId") 
+data <- lap_times %>% 
+  left_join(races, by = "raceId") %>% 
+  left_join(drivers, by = "driverId") 
 
 data <- data %>% 
   mutate(mob = month(dob, label = T), 
@@ -29,14 +32,18 @@ data <- data %>%
 
 theme_set(theme_minimal(base_family = "font", base_size = 12))
 
-data %>% 
+(bad <- data %>% 
   group_by(mob) %>% 
   summarise(avg_lap_time = mean(minutes),
             sd = sd(minutes)) %>% 
   ungroup() %>% 
-  ggplot(aes(mob, avg_lap_time)) +
+  #mutate(label = emoji("racing_car")) %>% 
+  ggplot(aes(mob, 
+             #label=label,
+             avg_lap_time)) +
   geom_col(color = "lightblue", 
            fill = "lightblue") +
+  #geom_text(family="EmojiOne") +
   labs(title = "Drivers born in May *conclusively* drive the fastest laps, followed by November babies",
        subtitle = "Must be something about odd numbered months...",
        caption = "Plot: @jakepscott2020 | Data: Ergast, TidyTuesday",
@@ -47,12 +54,12 @@ data %>%
         plot.title = element_markdown(face="bold", size = rel(1), color="black"),
         plot.subtitle = element_text(size=rel(.8),colour = "grey20"),
         plot.caption = element_text(face = "italic", size = rel(0.8), 
-                                    color = "grey50"))
+                                    color = "grey50")))
 
 ggsave(here("2021_09/Figures/misleading_plot.png"), dpi = 600, bg = "white")
 
 
-data %>% 
+(better <- data %>% 
   group_by(mob) %>% 
   summarise(avg_lap_time = mean(minutes),
             sd = sd(minutes)) %>% 
@@ -73,4 +80,12 @@ data %>%
         plot.title = element_markdown(face="bold", size = rel(1), color="black"),
         plot.subtitle = element_text(size=rel(.8),colour = "grey20"),
         plot.caption = element_text(face = "italic", size = rel(0.8), 
-                                    color = "grey50"))
+                                    color = "grey50")))
+
+ggsave(here("2021_09/Figures/better_plot.png"), dpi = 600, bg = "white")
+
+
+#Join the two plots
+
+bad + better + plot_layout(ncol = 1)
+ggsave(here("2021_09/Figures/joined_plot.png"), dpi = 600, bg = "white")
