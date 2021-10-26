@@ -33,31 +33,32 @@ ultra_rankings %>%
   count(runner, sort = T) %>% 
   head(15) %>%
   left_join(runners) %>% 
+  select(-gender) %>% 
   rename(Runner = runner,
          Wins = n,
-         Sex = gender,
          Nationality = nationality) %>% 
-  mutate(case_when(
-    Nationality == "USA" ~ here("2021-10-26/imgs/united_states_of_america_round_icon_640.png"),
-    Nationality == "FRA" ~ here("2021-10-26/imgs/france_round_icon_640.png"),
-    Nationality == "GBR" ~ here("2021-10-26/imgs/united_kingdom_round_icon_640.png"),
-    Nationality == "ESP" ~ here("2021-10-26/imgs/spain_round_icon_640.png"),
-    Nationality == "CHN" ~ here("2021-10-26/imgs/china_round_icon_640.png"),
-    Nationality == "GER" ~ here("2021-10-26/imgs/germany_round_icon_640.png"),
-    Nationality == "AUT" ~ here("2021-10-26/imgs/austria_round_icon_640.png"),
-  ))
+  mutate(Nationality_flag = case_when(
+    Nationality == "USA" ~ "https://raw.githubusercontent.com/jakepscott/Tidy_Tuesday_Collection/master/2021-10-26/imgs/united_states_of_america_round_icon_640.png",
+    Nationality == "FRA" ~ "https://raw.githubusercontent.com/jakepscott/Tidy_Tuesday_Collection/master/2021-10-26/imgs/france_round_icon_640.png",
+    Nationality == "GBR" ~ "https://raw.githubusercontent.com/jakepscott/Tidy_Tuesday_Collection/master/2021-10-26/imgs/united_kingdom_round_icon_640.png",
+    Nationality == "ESP" ~ "https://raw.githubusercontent.com/jakepscott/Tidy_Tuesday_Collection/master/2021-10-26/imgs/spain_round_icon_640.png",
+    Nationality == "CHN" ~ "https://raw.githubusercontent.com/jakepscott/Tidy_Tuesday_Collection/master/2021-10-26/imgs/china_round_icon_640.png",
+    Nationality == "GER" ~ "https://raw.githubusercontent.com/jakepscott/Tidy_Tuesday_Collection/master/2021-10-26/imgs/germany_round_icon_640.png",
+    Nationality == "AUT" ~ "https://raw.githubusercontent.com/jakepscott/Tidy_Tuesday_Collection/master/2021-10-26/imgs/austria_round_icon_640.png"
+    ),
+  ) %>% 
+  relocate(Nationality_flag, .before = Wins) %>% 
   gt() %>% 
   gtExtras::gt_theme_nytimes() %>% 
-  gtExtras::gt_merge_stack(col1 = Runner, col2 = Sex) %>% 
+  gtExtras::gt_merge_stack(col1 = Runner, col2 = Nationality) %>% 
   gtExtras::gt_fa_repeats(
     column = Wins, 
-    palette = "gold",
+    palette = "goldenrod",
     name = "trophy",
     align = "left"
-  )
-  gtExtras::gt_fa_repeats(
-    column=Titles,
-    palette = "orange",
-    name = "tshirt",
-    align='left'
-  )
+  ) %>% 
+  gtExtras::gt_img_rows(columns = Nationality_flag) %>% 
+  cols_align(align = "center",
+             columns = Nationality_flag)
+
+  
