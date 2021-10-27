@@ -3,6 +3,9 @@ library(tidyverse)
 library(gt)
 library(gtExtras)
 library(here)
+library(showtext)
+font_add_google("Roboto", "roboto")
+showtext_auto()
 
 # Load Data ----------------------------------------------------------------
 ultra_rankings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-10-26/ultra_rankings.csv')
@@ -84,7 +87,8 @@ top4_of_5_wins <- ultra_rankings %>%
 initial_table <- ultra_rankings %>% 
   filter(rank == 1) %>% 
   count(runner, sort = T) %>% 
-  filter(n > 5 | (runner %in% top4_of_5_wins$runner)) %>% 
+  #filter(n > 5 | (runner %in% top4_of_5_wins$runner)) %>% 
+  head(6) %>% 
   left_join(runners) %>%
   left_join(runner_times) %>%
   left_join(position_finishes_percent) %>% 
@@ -139,7 +143,7 @@ initial_table <- initial_table %>%
 
 
 #Add bar plot
-initial_table %>% 
+tab <- initial_table %>% 
   gt_plt_bar_stack(
     # Column with data
     column=rank,
@@ -154,10 +158,45 @@ initial_table %>%
     trim=TRUE
   ) %>% 
   tab_spanner(
-    label = md("**Percent** of races runner finished in given group"),
-    columns = c(rank)
+    label = md("*Percent* of races runner finished in given group"),
+    columns = c(rank),
     ) %>% 
   tab_header(title = "Ultra Trail Running First Place Finishes",
-             subtitle = md("\"Ultra Trail Runs\", are runs that are **42 kilometers** or longer and that take place on an **unpaved** surface. These runs often, though not always, include huge elevation changes; the *Gede Pangrango 100* race in 2018 had an elevation gain of **14430** meters. They draw runners from around the world, with winners spanning almost 60 countries (though the USA and Great Britain hold a disproportionte share of first place finishes)")
-             )
+             subtitle = md("\"Ultra Trail Runs\", are runs that are **42 kilometers** or longer and that take place on an **unpaved** surface. These runs often, though not always, include huge elevation changes; the *Gede Pangrango 100* race in 2018 had an elevation gain of **14,430** meters. They draw runners from around the world, with first place finishers spanning almost 60 countries (though a disproportionate share hail from the USA and Great Britain).")
+             ) %>% 
+  tab_source_note(
+    source_note = md("**Data:** @BjnNowak & TidyTuesday | **Inspiration**: @BjnNowak | **Table:** @jakepscott2020")
+  ) %>% 
+  # Style header font
+  gt::tab_style(
+    style = list(
+      cell_text(font = "roboto")
+    ),
+    locations = list(
+      cells_column_spanners(gt::everything())
+    )
+  ) %>% 
+  tab_style(
+    style = list(
+      cell_text(color='grey20', align = "center", font = "roboto")),
+    locations = cells_column_labels(
+      columns = c(Runner, Nationality_flag, Wins, time)
+    )) %>% 
+  #Apply different style to the title
+  tab_style(
+    locations = cells_title(groups = "title"),
+    style     = list(
+      cell_text(size = 48)
+    )
+  ) %>% 
+  tab_style(
+    locations = cells_source_notes(),
+    style = list(
+      cell_text(color = "grey60", size = 10))
+    )
+
+
+tab
+
+gtsave(tab, filename = here("2021-10-26/figures/ultra-trail-running.png"))
 
