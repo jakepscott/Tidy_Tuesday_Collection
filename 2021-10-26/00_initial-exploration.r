@@ -72,7 +72,7 @@ position_finishes_percent <- top_runners_with_races %>%
   mutate(percent = round(n / sum(n)*100, digits = 0)) %>% 
   summarise(rank = list(percent)) 
 
-# RUnners with best ranks among those with 5 wins
+# Runners with best ranks among those with 5 wins
 five_wins <- top_runners %>% 
   filter(n == 5)
 
@@ -192,7 +192,7 @@ tab <- initial_table %>%
   tab_style(
     locations = cells_source_notes(),
     style = list(
-      cell_text(color = "grey60", size = 10))
+      cell_text(color = "grey30", size = 10))
     )
 
 
